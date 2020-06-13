@@ -1,73 +1,23 @@
 const express = require("express");
 const path = require("path");
-const notes = require("./db/db.json");
-const fs = require("fs");
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.use(express.static("public"));
+// required our API and HTML Routes
+const apiRoutes = require("./public/routes/apiRoutes");
+const htmlRoutes = require("./public/routes/htmlRoutes");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-app.get("/notes", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/notes.html"));
-});
-
-app.get("/api/notes", (req, res) => {
-  res.json(notes);
-});
-
-app.get("/api/notes/:id", (req, res) => {
-  const id = req.params.id;
-  res.json(notes[id]);
-});
-
-app.post("/api/notes", function (req, res) {
-  var newnote = req.body;
-
-  newnote.id = notes.length;
-
-  console.log(newnote);
-
-  notes.push(newnote);
-
-  fs.writeFile("db/db.json", JSON.stringify(notes), function (err) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log("Commit logged!");
-    }
-  });
-
-  res.json(newnote);
-});
-
-app.delete("/api/notes/:id", (req, res) => {
-  const id = req.params.id;
-  for (let i = 0; i < notes.length; i++) {
-    const note = notes[i];
-    if (note.id === parseInt(id)) {
-      notes.splice(i, 1);
-    }
-  }
-
-  fs.writeFile("db/db.json", JSON.stringify(notes), function (err) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log("Committed!");
-    }
-  });
-
-  res.json(notes);
-});
+// app.use("/api", apiRoutes);
+app.use("/", htmlRoutes);
+app.use("/api", apiRoutes);
 
 app.listen(PORT, function () {
   console.log("App listening on PORT " + PORT);
 });
+
+
